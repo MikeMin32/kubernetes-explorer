@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: busybox-logger
+  namespace: demo
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: busybox-logger
+  template:
+    metadata:
+      labels:
+        app: busybox-logger
+    spec:
+      nodeSelector:
+        kubernetes.io/hostname: k8sx-worker
+      containers:
+        - name: busybox
+          image: busybox:1.36
+          args:
+            - /bin/sh
+            - -c
+            - |
+              i=0
+              while true; do
+                i=$((i+1))
+                echo "$(date -Iseconds) [busybox-logger] tick=$i"
+                sleep 2
+              done
