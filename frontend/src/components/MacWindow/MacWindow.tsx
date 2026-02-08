@@ -1,4 +1,5 @@
 import "./MacWindow.css";
+import k8sLogo from "../DetailsPanel/Kubernetes_logo_without_workmark.svg.png";
 
 type Props = {
   title: string;
@@ -11,12 +12,9 @@ export function MacWindow({ title, children }: Props) {
       <div className="mw-window">
         <div className="mw-titlebar">
           <div className="mw-left">
-            <div className="mw-dots">
-              <span className="dot red" />
-              <span className="dot yellow" />
-              <span className="dot green" />
+            <div className="mw-logo">
+              <img src={k8sLogo} alt="Kubernetes" className="mw-logo-img" />
             </div>
-            <div className="mw-appicon" aria-hidden />
             <div className="mw-title">{title}</div>
           </div>
           <div className="mw-right">

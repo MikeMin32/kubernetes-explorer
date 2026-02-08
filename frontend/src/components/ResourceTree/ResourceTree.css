@@ -95,3 +95,10 @@ details:not([open]) .rt-caret {
 .rt-text {
   font-size: 16px;
 }
+
+.rt-muted {
+  color: var(--muted);
+  font-size: 14px;
+  font-weight: 400;
+  padding: 10px 12px;
+}

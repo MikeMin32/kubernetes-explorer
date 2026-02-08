@@ -1,14 +1,16 @@
 import "./LogsPanel.css";
 
 type Props = {
+  enabled: boolean;
   logs: string;
   tailLines: number;
   onTailLinesChange: (n: number) => void;
   loading?: boolean;
   onFetch: () => void;
+  onClose?: () => void;
 };
 
-export function LogsPanel({ logs, tailLines, onTailLinesChange, loading, onFetch }: Props) {
+export function LogsPanel({ enabled, logs, tailLines, onTailLinesChange, loading, onFetch, onClose }: Props) {
   return (
     <div className="lp">
       <div className="lp-header">
@@ -22,15 +24,23 @@ export function LogsPanel({ logs, tailLines, onTailLinesChange, loading, onFetch
             max={500}
             value={tailLines}
             onChange={(e) => onTailLinesChange(Number(e.target.value))}
+            disabled={!enabled}
           />
-          <button className="lp-btn" type="button" onClick={onFetch} disabled={loading}>
+          <button className="lp-btn" type="button" onClick={onFetch} disabled={!enabled || loading}>
             {loading ? "Fetching…" : "Fetch Logs"}
           </button>
+          {onClose && (
+            <button className="lp-close" type="button" onClick={onClose} title="Close logs">
+              ✕
+            </button>
+          )}
         </div>
       </div>
 
       <div className="lp-box">
-        <pre className="lp-pre">{logs ? logs : "—"}</pre>
+        <pre className="lp-pre">
+          {!enabled ? "Select a pod to view logs." : logs ? logs : "—"}
+        </pre>
       </div>
     </div>
   );

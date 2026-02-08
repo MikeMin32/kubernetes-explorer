@@ -9,17 +9,30 @@
   background: linear-gradient(var(--sidebar), var(--sidebar2));
   border-right: 1px solid var(--line);
   padding: 16px 14px;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
 .xp-main {
   padding: 18px 18px 16px 18px;
-  display: grid;
-  grid-template-rows: 1fr 320px;
+  display: flex;
+  flex-direction: column;
   gap: 16px;
+  overflow: hidden;
 }
 
-.xp-top, .xp-bottom {
+.xp-top {
   border: 1px solid var(--line);
   border-radius: 10px;
   background: #fff;
+  flex: 1;
+  overflow: hidden;
+}
+
+.xp-bottom {
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: #fff;
+  height: 320px;
+  flex-shrink: 0;
 }
