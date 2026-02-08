@@ -1,0 +1,126 @@
+.dp {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.dp-header {
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--line);
+}
+
+.dp-title {
+  font-size: 28px;
+  font-weight: 800;
+  letter-spacing: 0.2px;
+}
+
+.dp-h {
+  color: #111827;
+}
+
+.dp-name {
+  color: #1f8f5f; /* зеленувато як на скріні */
+  font-weight: 800;
+}
+
+.dp-body {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.dp-row {
+  display: grid;
+  grid-template-columns: 120px 1fr;
+  align-items: center;
+  gap: 10px;
+  font-size: 18px;
+}
+
+.dp-label {
+  font-weight: 800;
+  color: #111827;
+}
+
+.dp-value {
+  color: #111827;
+}
+
+.dp-muted {
+  color: var(--muted);
+  font-size: 16px;
+}
+
+.dp-sep {
+  height: 1px;
+  background: var(--line);
+  margin: 8px 0;
+}
+
+.dp-subtitle {
+  font-weight: 800;
+  font-size: 18px;
+}
+
+.dp-labels {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.dp-chip {
+  background: #eef2f7;
+  border: 1px solid #dfe6f1;
+  padding: 8px 12px;
+  border-radius: 10px;
+  font-size: 16px;
+}
+
+.dp-chip-k {
+  font-weight: 800;
+  margin-right: 6px;
+}
+
+.dp-badge {
+  display: inline-block;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: #eef2f7;
+  border: 1px solid #dfe6f1;
+  font-weight: 800;
+}
+
+.dp-badge.ok {
+  background: rgba(31,143,95,0.12);
+  border-color: rgba(31,143,95,0.25);
+  color: #1f8f5f;
+}
+
+.dp-container {
+  margin-top: -2px;
+}
+
+.dp-list {
+  margin: 0;
+  padding-left: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.dp-bullet {
+  margin-right: 8px;
+  color: #111827;
+}
+
+.dp-li {
+  font-size: 18px;
+}
+
+.dp-mono {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+}

@@ -1,0 +1,69 @@
+.lp {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  padding: 14px 16px 16px 16px;
+  gap: 12px;
+}
+
+.lp-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.lp-title {
+  font-weight: 800;
+  font-size: 18px;
+}
+
+.lp-controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.lp-input {
+  width: 70px;
+  padding: 10px 10px;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  font-size: 16px;
+  outline: none;
+}
+
+.lp-btn {
+  padding: 12px 18px;
+  border-radius: 10px;
+  border: none;
+  background: var(--blue);
+  color: #fff;
+  font-weight: 800;
+  font-size: 16px;
+  cursor: pointer;
+  box-shadow: 0 6px 16px rgba(47,111,237,0.28);
+}
+
+.lp-btn:disabled {
+  opacity: 0.7;
+  cursor: default;
+}
+
+.lp-box {
+  flex: 1;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: #fbfcfe;
+  overflow: hidden;
+}
+
+.lp-pre {
+  margin: 0;
+  padding: 14px;
+  height: 100%;
+  overflow: auto;
+  font-size: 16px;
+  line-height: 1.55;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  color: #111827;
+}
