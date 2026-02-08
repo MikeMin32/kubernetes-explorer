@@ -1,24 +1,44 @@
-export type NodeItem = { name: string };
+export type NodeItem = {
+  name: string;
+  status: string;
+  roles: string[];
+  kubeletVersion?: string | null;
+  ageSeconds?: number | null;
+  labels: Record<string, string>;
+};
 
-export type NamespaceItem = { name: string };
+export type NamespaceItem = {
+  name: string;
+  status: string;
+  ageSeconds?: number | null;
+  labels: Record<string, string>;
+};
 
 export type PodListItem = {
   name: string;
   namespace: string;
+  status: string;
+  nodeName?: string | null;
+  restarts: number;
+  ageSeconds?: number | null;
+  labels: Record<string, string>;
 };
 
 export type PodDetails = {
   name: string;
   namespace: string;
-  status?: string;
-  nodeName?: string;
-  age?: string; // якщо бекенд дає готове, ок; якщо ні — порахуємо з startTime
-  restarts?: number;
-  labels?: Record<string, string>;
-  containers?: Array<{
+  status: string;
+  nodeName?: string | null;
+  podIP?: string | null;
+  hostIP?: string | null;
+  restarts: number;
+  ageSeconds?: number | null;
+  labels: Record<string, string>;
+  containers: Array<{ name: string; image?: string | null }>;
+  containerStatuses: Array<{
     name: string;
-    image?: string;
-    ready?: boolean;
-    restartCount?: number;
+    ready: boolean;
+    restartCount: number;
+    image?: string | null;
   }>;
 };

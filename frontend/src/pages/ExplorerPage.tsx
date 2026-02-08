@@ -1,24 +1,30 @@
 import { useEffect, useMemo, useState } from "react";
-import { MacWindow } from "../components/MacWindow/MacWindow.tsx";
-import { ResourceTree } from "../components/ResourceTree/ResourceTree.tsx";
-import { DetailsPanel } from "../components/DetailsPanel/DetailsPanel.tsx";
-import { LogsPanel } from "../components/LogsPanel/LogsPanel.tsx";
-import { getNamespaces, getNodes, getPods, getPod, getPodLogs } from "../api/k8s.ts";
-import type { NamespaceItem, NodeItem, PodDetails, PodListItem } from "../api/types.ts";
+import { MacWindow } from "../components/MacWindow/MacWindow";
+import { ResourceTree } from "../components/ResourceTree/ResourceTree";
+import { DetailsPanel } from "../components/DetailsPanel/DetailsPanel";
+import { LogsPanel } from "../components/LogsPanel/LogsPanel";
+import { getNamespaces, getNodes, getPods, getPod, getPodLogs } from "../api/k8s";
+import type { NamespaceItem, NodeItem, PodDetails, PodListItem } from "../api/types";
 import "./ExplorerPage.css";
 
-type SelectedPod = { namespace: string; name: string } | null;
+type Selected =
+  | { kind: "node"; name: string }
+  | { kind: "namespace"; name: string }
+  | { kind: "pod"; namespace: string; name: string }
+  | null;
 
 export function ExplorerPage() {
   const [nodes, setNodes] = useState<NodeItem[]>([]);
   const [namespaces, setNamespaces] = useState<NamespaceItem[]>([]);
-  const [pods, setPods] = useState<Record<string, PodListItem[]>>({});
+  const [podsByNs, setPodsByNs] = useState<Record<string, PodListItem[]>>({});
+  const [podsLoadingNs, setPodsLoadingNs] = useState<Record<string, boolean>>({});
 
-  const [selected, setSelected] = useState<SelectedPod>(null);
+  const [selected, setSelected] = useState<Selected>(null);
+
   const [podDetails, setPodDetails] = useState<PodDetails | null>(null);
+  const [logs, setLogs] = useState<string>("");
 
   const [tailLines, setTailLines] = useState<number>(10);
-  const [logs, setLogs] = useState<string>("");
   const [loadingDetails, setLoadingDetails] = useState(false);
   const [loadingLogs, setLoadingLogs] = useState(false);
 
@@ -28,24 +34,44 @@ export function ExplorerPage() {
       setNodes(n);
       setNamespaces(ns);
 
-      // MVP: підтягуємо pods тільки для demo (як у твоєму кейсі), щоб не гальмувало
-      const demoPods = await getPods("demo");
-      setPods((prev) => ({ ...prev, demo: demoPods }));
+      // MVP: preload demo pods, але не хардкодимо дерево — просто підвантажимо дефолтний namespace якщо є
+      if (ns.some((x) => x.name === "demo")) {
+        await loadPodsForNamespace("demo");
+      }
     })().catch(console.error);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  async function loadPodsForNamespace(ns: string) {
+    if (podsByNs[ns]) return; // кеш
+    setPodsLoadingNs((p) => ({ ...p, [ns]: true }));
+    try {
+      const pods = await getPods(ns);
+      setPodsByNs((p) => ({ ...p, [ns]: pods }));
+    } finally {
+      setPodsLoadingNs((p) => ({ ...p, [ns]: false }));
+    }
+  }
+
+  // when selecting pod -> fetch details
   useEffect(() => {
-    if (!selected) return;
-    setLoadingDetails(true);
     setPodDetails(null);
     setLogs("");
 
-    getPod(selected.namespace, selected.name)
-      .then(setPodDetails)
-      .finally(() => setLoadingDetails(false));
-  }, [selected?.namespace, selected?.name]);
+    if (!selected) return;
+
+    if (selected.kind === "pod") {
+      setLoadingDetails(true);
+      getPod(selected.namespace, selected.name)
+        .then(setPodDetails)
+        .finally(() => setLoadingDetails(false));
+    }
+  }, [selected]);
 
   const title = useMemo(() => "Kubernetes Explorer", []);
+
+  const selectedNode = selected?.kind === "node" ? nodes.find((n) => n.name === selected.name) ?? null : null;
+  const selectedNs = selected?.kind === "namespace" ? namespaces.find((n) => n.name === selected.name) ?? null : null;
 
   return (
     <MacWindow title={title}>
@@ -54,25 +80,29 @@ export function ExplorerPage() {
           <ResourceTree
             nodes={nodes}
             namespaces={namespaces}
-            podsByNs={pods}
-            selectedPod={selected}
-            onSelectPod={(ns: string, name: string) => setSelected({ namespace: ns, name })}
+            podsByNs={podsByNs}
+            podsLoadingNs={podsLoadingNs}
+            selected={selected}
+            onSelectNode={(name) => setSelected({ kind: "node", name })}
+            onSelectNamespace={async (name) => {
+              setSelected({ kind: "namespace", name });
+              await loadPodsForNamespace(name);
+            }}
+            onSelectPod={(namespace, name) => setSelected({ kind: "pod", namespace, name })}
           />
         </div>
 
         <div className="xp-main">
           <div className="xp-top">
-            <DetailsPanel pod={podDetails} loading={loadingDetails} />
-          </div>
-
-          <div className="xp-bottom">
-            <LogsPanel
-              logs={logs}
-              tailLines={tailLines}
-              onTailLinesChange={setTailLines}
-              loading={loadingLogs}
-              onFetch={async () => {
-                if (!selected) return;
+            <DetailsPanel
+              selected={selected}
+              node={selectedNode}
+              namespace={selectedNs}
+              pod={podDetails}
+              loading={loadingDetails}
+              hasLogs={!!logs}
+              onFetchLogs={async () => {
+                if (!selected || selected.kind !== "pod") return;
                 setLoadingLogs(true);
                 try {
                   const txt = await getPodLogs(selected.namespace, selected.name, tailLines);
@@ -81,8 +111,32 @@ export function ExplorerPage() {
                   setLoadingLogs(false);
                 }
               }}
+              fetchingLogs={loadingLogs}
             />
           </div>
+
+          {logs && (
+            <div className="xp-bottom">
+              <LogsPanel
+                enabled={selected?.kind === "pod"}
+                logs={logs}
+                tailLines={tailLines}
+                onTailLinesChange={setTailLines}
+                loading={loadingLogs}
+                onFetch={async () => {
+                  if (!selected || selected.kind !== "pod") return;
+                  setLoadingLogs(true);
+                  try {
+                    const txt = await getPodLogs(selected.namespace, selected.name, tailLines);
+                    setLogs(txt);
+                  } finally {
+                    setLoadingLogs(false);
+                  }
+                }}
+                onClose={() => setLogs("")}
+              />
+            </div>
+          )}
         </div>
       </div>
     </MacWindow>

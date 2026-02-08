@@ -1,13 +1,21 @@
 import "./ResourceTree.css";
 import type { NamespaceItem, NodeItem, PodListItem } from "../../api/types";
 
-type SelectedPod = { namespace: string; name: string } | null;
+type Selected =
+  | { kind: "node"; name: string }
+  | { kind: "namespace"; name: string }
+  | { kind: "pod"; namespace: string; name: string }
+  | null;
 
 type Props = {
   nodes: NodeItem[];
   namespaces: NamespaceItem[];
   podsByNs: Record<string, PodListItem[]>;
-  selectedPod: SelectedPod;
+  podsLoadingNs: Record<string, boolean>;
+  selected: Selected;
+
+  onSelectNode: (name: string) => void;
+  onSelectNamespace: (name: string) => void;
   onSelectPod: (ns: string, name: string) => void;
 };
 
@@ -15,41 +23,73 @@ export function ResourceTree({
   nodes,
   namespaces,
   podsByNs,
-  selectedPod,
+  podsLoadingNs,
+  selected,
+  onSelectNode,
+  onSelectNamespace,
   onSelectPod,
 }: Props) {
   return (
     <div className="rt">
-      <Section title="Nodes" defaultOpen>
+      <Section title="Nodes" defaultOpen={false}>
         {nodes.map((n) => (
-          <Row key={n.name} icon="node" text={n.name} />
+          <Row
+            key={n.name}
+            icon="node"
+            text={n.name}
+            active={selected?.kind === "node" && selected.name === n.name}
+            onClick={() => onSelectNode(n.name)}
+          />
         ))}
       </Section>
 
       <Divider />
 
-      <Section title="Namespaces" defaultOpen>
+      <Section title="Namespaces" defaultOpen={false}>
         {namespaces.map((ns) => (
-          <Row key={ns.name} icon="ns" text={ns.name} />
+          <Row
+            key={ns.name}
+            icon="ns"
+            text={ns.name}
+            active={selected?.kind === "namespace" && selected.name === ns.name}
+            onClick={() => onSelectNamespace(ns.name)}
+          />
         ))}
       </Section>
 
       <Divider />
 
-      <Section title="Pods" defaultOpen>
-        {/* MVP: показуємо pods лише demo (як на картинці) */}
-        {(podsByNs["demo"] ?? []).map((p) => {
-          const active = selectedPod?.namespace === p.namespace && selectedPod?.name === p.name;
-          return (
-            <Row
-              key={`${p.namespace}/${p.name}`}
-              icon="pod"
-              text={p.name}
-              active={active}
-              onClick={() => onSelectPod(p.namespace, p.name)}
-            />
-          );
-        })}
+      <Section title="Pods" defaultOpen={false}>
+        {selected?.kind === "namespace" || selected?.kind === "pod" ? (
+          <>
+            {(() => {
+              const nsName = selected.kind === "namespace" ? selected.name : selected.namespace;
+              return (
+                <>
+                  {podsLoadingNs[nsName] ? <div className="rt-muted">Loading…</div> : null}
+
+                  {(podsByNs[nsName] ?? []).map((p) => (
+                    <Row
+                      key={`${p.namespace}/${p.name}`}
+                      icon="pod"
+                      text={p.name}
+                      active={
+                        selected?.kind === "pod" && selected.namespace === p.namespace && selected.name === p.name
+                      }
+                      onClick={() => onSelectPod(p.namespace, p.name)}
+                    />
+                  ))}
+
+                  {!podsLoadingNs[nsName] && (podsByNs[nsName] ?? []).length === 0 ? (
+                    <div className="rt-muted">No pods</div>
+                  ) : null}
+                </>
+              );
+            })()}
+          </>
+        ) : (
+          <div className="rt-muted">Select a namespace to view pods</div>
+        )}
       </Section>
     </div>
   );
