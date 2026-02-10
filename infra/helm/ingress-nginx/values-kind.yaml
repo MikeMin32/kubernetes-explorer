@@ -1,0 +1,9 @@
+controller:
+  replicaCount: 1
+
+  nodeSelector:
+    ingress-ready: "true"
+
+  service:
+    type: LoadBalancer
+    externalTrafficPolicy: Local
