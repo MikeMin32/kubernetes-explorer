@@ -1,0 +1,106 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: k8s-explorer
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: explorer-backend
+  namespace: k8s-explorer
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: explorer-readonly
+rules:
+  - apiGroups: [""]
+    resources: ["nodes", "namespaces", "pods"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: [""]
+    resources: ["pods/log"]
+    verbs: ["get"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: explorer-readonly-binding
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: explorer-readonly
+subjects:
+  - kind: ServiceAccount
+    name: explorer-backend
+    namespace: k8s-explorer
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: explorer-backend
+  namespace: k8s-explorer
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: explorer-backend
+  template:
+    metadata:
+      labels:
+        app: explorer-backend
+    spec:
+      serviceAccountName: explorer-backend
+      containers:
+        - name: backend
+          image: k8s-explorer-backend:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8000
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: explorer-backend
+  namespace: k8s-explorer
+spec:
+  selector:
+    app: explorer-backend
+  ports:
+    - name: http
+      port: 8000
+      targetPort: 8000
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: explorer-gateway
+  namespace: k8s-explorer
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: explorer-gateway
+  template:
+    metadata:
+      labels:
+        app: explorer-gateway
+    spec:
+      containers:
+        - name: gateway
+          image: k8s-explorer-gateway:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 80
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: explorer-gateway
+  namespace: k8s-explorer
+spec:
+  selector:
+    app: explorer-gateway
+  ports:
+    - name: http
+      port: 80
+      targetPort: 80
