@@ -1,0 +1,20 @@
+services:
+  backend:
+    build:
+      context: ../backend
+      dockerfile: Dockerfile
+    container_name: k8s-explorer-backend
+    ports:
+      - "8000:8000"
+    environment:
+      - K8S_EXPLORER_ALLOWED_ORIGINS=http://localhost:8080
+
+  gateway:
+    build:
+      context: ..                 
+      dockerfile: infra/Dockerfile.gateway
+    container_name: k8s-explorer-gateway
+    depends_on:
+      - backend
+    ports:
+      - "8080:80"
