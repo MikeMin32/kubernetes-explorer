@@ -1,0 +1,18 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: explorer-ui
+  namespace: k8s-explorer
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: k8s-explorer.local
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: explorer-gateway
+                port:
+                  number: 80
