@@ -40,7 +40,12 @@ metadata:
   name: explorer-backend
   namespace: k8s-explorer
 spec:
-  replicas: 1
+  replicas: 2
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: 1
   selector:
     matchLabels:
       app: explorer-backend
@@ -50,12 +55,53 @@ spec:
         app: explorer-backend
     spec:
       serviceAccountName: explorer-backend
+      terminationGracePeriodSeconds: 30
       containers:
         - name: backend
           image: k8s-explorer-backend:latest
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8000
+
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 5
+            periodSeconds: 5
+
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 15
+            periodSeconds: 10
+
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "500m"
+              memory: "256Mi"
+
+          securityContext:
+            allowPrivilegeEscalation: false
+            runAsNonRoot: true
+            runAsUser: 1000
+            capabilities:
+              drop: ["ALL"]
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: explorer-backend-pdb
+  namespace: k8s-explorer
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: explorer-backend
 ---
 apiVersion: v1
 kind: Service
@@ -77,6 +123,11 @@ metadata:
   namespace: k8s-explorer
 spec:
   replicas: 1
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: 1
   selector:
     matchLabels:
       app: explorer-gateway
@@ -85,12 +136,42 @@ spec:
       labels:
         app: explorer-gateway
     spec:
+      terminationGracePeriodSeconds: 15
       containers:
         - name: gateway
           image: k8s-explorer-gateway:latest
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 80
+
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 80
+            initialDelaySeconds: 5
+            periodSeconds: 5
+
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 80
+            initialDelaySeconds: 10
+            periodSeconds: 10
+
+          resources:
+            requests:
+              cpu: "50m"
+              memory: "64Mi"
+            limits:
+              cpu: "200m"
+              memory: "128Mi"
+
+          securityContext:
+            allowPrivilegeEscalation: false
+            runAsNonRoot: true
+            runAsUser: 101
+            capabilities:
+              drop: ["ALL"]
 ---
 apiVersion: v1
 kind: Service
