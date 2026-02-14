@@ -122,7 +122,7 @@ metadata:
   name: explorer-gateway
   namespace: k8s-explorer
 spec:
-  replicas: 1
+  replicas: 2
   strategy:
     type: RollingUpdate
     rollingUpdate:
@@ -137,12 +137,21 @@ spec:
         app: explorer-gateway
     spec:
       terminationGracePeriodSeconds: 15
+
+      volumes:
+        - name: nginx-cache
+          emptyDir: {}
+
       containers:
         - name: gateway
           image: k8s-explorer-gateway:latest
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 80
+
+          volumeMounts:
+            - name: nginx-cache
+              mountPath: /var/cache/nginx
 
           readinessProbe:
             httpGet:
@@ -168,10 +177,20 @@ spec:
 
           securityContext:
             allowPrivilegeEscalation: false
-            runAsNonRoot: true
-            runAsUser: 101
             capabilities:
               drop: ["ALL"]
+              add: ["CHOWN", "NET_BIND_SERVICE", "SETGID", "SETUID"]
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: explorer-gateway-pdb
+  namespace: k8s-explorer
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: explorer-gateway
 ---
 apiVersion: v1
 kind: Service
