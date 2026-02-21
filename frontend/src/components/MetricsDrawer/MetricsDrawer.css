@@ -1,0 +1,234 @@
+/* ============================================================
+   MetricsDrawer — vertical browser-style tab + inline panel
+   ============================================================ */
+
+/* ------------------------------------------------------------------
+   .mdr-tab
+   Looks like a vertical browser tab (think Adobe tabs, rotated 90°).
+   It sits in .mw-tab-slot behind the window (z-index:0).
+   Left edge is flush with the window right border — flat.
+   Right side has rounded corners.
+
+   Inactive: slightly darker tinted background, peeking out ~18px.
+   Active  : white background, no top/bottom/right border overlap,
+             left edge is invisible — visually becomes part of the
+             window surface.
+   ------------------------------------------------------------------ */
+
+.mdr-tab {
+  /* Tall vertical tab */
+  width: 46px;
+  height: 112px;
+  padding: 0;
+  cursor: pointer;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+
+  /* Rounded on the outer three sides, flat left (attaches to window) */
+  border-radius: 0 10px 10px 0;
+  border: 1px solid #b8c5d9;
+  border-left: none;
+
+  /* Inactive: tinted slab, looks like it comes from behind the window */
+  background: linear-gradient(180deg, #e8eef7 0%, #d8e2f0 100%);
+  box-shadow:
+    4px 2px 12px rgba(0,0,0,0.18),
+    inset -1px 0 0 rgba(255,255,255,0.6);
+
+  /* Inactive tab is behind window — no z-index needed */
+
+  transition:
+    background   200ms ease,
+    box-shadow   200ms ease,
+    border-color 200ms ease,
+    transform    200ms ease;
+}
+
+.mdr-tab:hover:not(.mdr-tab--active) {
+  background: linear-gradient(180deg, #dde6f5 0%, #ccd6ed 100%);
+  box-shadow:
+    5px 2px 16px rgba(0,0,0,0.22),
+    inset -1px 0 0 rgba(255,255,255,0.65);
+  transform: translateX(4px);
+}
+
+/*
+  Active tab: white background, merges with the window face.
+  position:relative + z-index:2 beats mw-window's z-index:1 so the
+  tab paints on top and the seam between them disappears.
+*/
+.mdr-tab--active {
+  background: #ffffff;
+  border-color: rgba(0,0,0,0.08);
+  /* Right-side shadow keeps the depth illusion; left side is seamless */
+  box-shadow:
+    3px 0 10px rgba(0,0,0,0.08),
+    inset -1px 0 0 rgba(255,255,255,0.9);
+  position: relative;
+  z-index: 2;
+  transform: none;
+}
+
+.mdr-tab:focus-visible {
+  outline: 2px solid var(--blue);
+  outline-offset: 2px;
+}
+
+/* Vertical label */
+.mdr-tab-label {
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  transform: rotate(180deg);   /* read top-to-bottom */
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.10em;
+  text-transform: uppercase;
+  color: #5a7aaa;
+  user-select: none;
+  transition: color 200ms ease;
+}
+
+.mdr-tab--active .mdr-tab-label {
+  color: var(--blue);
+}
+
+
+/* ------------------------------------------------------------------
+   MetricsPanel — renders inside .xp-top (the DetailsPanel area)
+   ------------------------------------------------------------------ */
+
+.mdr-panel {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.mdr-panel-header {
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--line);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-shrink: 0;
+}
+
+.mdr-panel-title {
+  font-size: 28px;
+  font-weight: 800;
+  color: #111827;
+  letter-spacing: 0.1px;
+}
+
+.mdr-panel-body {
+  padding: 20px;
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+
+/* ------------------------------------------------------------------
+   Metric cards
+   ------------------------------------------------------------------ */
+
+.mdr-metrics {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px;
+  max-width: 560px;
+}
+
+.mdr-card {
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 18px 16px 16px;
+  background: #f8fafc;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  transition: box-shadow 150ms ease;
+}
+
+.mdr-card:hover {
+  box-shadow: 0 2px 10px rgba(0,0,0,0.07);
+}
+
+.mdr-card--green  { border-color: #b6dfc6; background: #f0faf4; }
+.mdr-card--blue   { border-color: #b8d3f5; background: #f0f6ff; }
+.mdr-card--orange { border-color: #f0d5a8; background: #fdf7ef; }
+
+.mdr-card-value {
+  font-size: 40px;
+  font-weight: 800;
+  color: #111827;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.mdr-card-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+
+/* ------------------------------------------------------------------
+   Status / error
+   ------------------------------------------------------------------ */
+
+.mdr-status {
+  color: var(--muted);
+  font-size: 14px;
+  text-align: center;
+  padding: 40px 0;
+}
+
+.mdr-error {
+  font-size: 13px;
+  color: #b91c1c;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  padding: 12px 14px;
+  line-height: 1.5;
+  max-width: 420px;
+}
+
+
+/* ------------------------------------------------------------------
+   Refresh button
+   ------------------------------------------------------------------ */
+
+.mdr-refresh-btn {
+  align-self: flex-start;
+  background: none;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  padding: 7px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--muted);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 150ms ease, color 150ms ease, border-color 150ms ease;
+}
+
+.mdr-refresh-btn:hover:not(:disabled) {
+  background: #f0f3f8;
+  border-color: #b0bcce;
+  color: #111827;
+}
+
+.mdr-refresh-btn:disabled {
+  opacity: 0.5;
+  cursor: default;
+}

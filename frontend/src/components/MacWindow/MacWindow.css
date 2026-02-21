@@ -5,18 +5,49 @@
   align-items: center;
   justify-content: center;
   padding: 24px;
-  overflow: hidden;
+  overflow: visible;
   box-sizing: border-box;
 }
 
-.mw-window {
+/*
+  Wrapper around the window — position:relative so the tab slot can
+  be placed exactly relative to the window edges. overflow:visible so
+  the tab can protrude to the right without being clipped.
+*/
+.mw-window-wrap {
+  position: relative;
   width: min(1200px, 95vw);
   height: min(740px, 85vh);
+  flex-shrink: 0;
+}
+
+.mw-window {
+  width: 100%;
+  height: 100%;
   background: var(--win);
   border-radius: var(--radius);
   box-shadow: var(--shadow);
   overflow: hidden;
   border: 1px solid rgba(0,0,0,0.06);
+  position: relative;
+  z-index: 1;
+}
+
+/*
+  Tab slot: anchored to the window's right border.
+  right: -42px  → 42 px of each tab sticks out, 4px tucked behind.
+  top: 100px    → just below titlebar.
+  flex column so the two tabs stack neatly.
+  NO z-index here — lets the active button's z-index:2 beat
+  mw-window's z-index:1 without a stacking-context trap.
+*/
+.mw-tab-slot {
+  position: absolute;
+  right: -42px;
+  top: 100px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 }
 
 .mw-titlebar {

@@ -62,7 +62,9 @@ spec:
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8000
-
+          env:
+            - name: PROMETHEUS_URL
+              value: http://kps-kube-prometheus-stack-prometheus.monitoring.svc.cluster.local:9090
           readinessProbe:
             httpGet:
               path: /health
