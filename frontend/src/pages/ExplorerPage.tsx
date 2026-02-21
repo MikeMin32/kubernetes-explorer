@@ -5,6 +5,7 @@ import { DetailsPanel } from "../components/DetailsPanel/DetailsPanel";
 import { LogsPanel } from "../components/LogsPanel/LogsPanel";
 import { getNamespaces, getNodes, getPods, getPod, getPodLogs } from "../api/k8s";
 import type { NamespaceItem, NodeItem, PodDetails, PodListItem } from "../api/types";
+import { MetricsTab, MetricsPanel, KubernetesTab } from "../components/MetricsDrawer/MetricsDrawer";
 import "./ExplorerPage.css";
 
 type Selected =
@@ -27,6 +28,7 @@ export function ExplorerPage() {
   const [tailLines, setTailLines] = useState<number>(10);
   const [loadingDetails, setLoadingDetails] = useState(false);
   const [loadingLogs, setLoadingLogs] = useState(false);
+  const [showMetrics, setShowMetrics] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -74,7 +76,21 @@ export function ExplorerPage() {
   const selectedNs = selected?.kind === "namespace" ? namespaces.find((n) => n.name === selected.name) ?? null : null;
 
   return (
-    <MacWindow title={title}>
+    <MacWindow
+      title={title}
+      rightTab={
+        <>
+          <KubernetesTab
+            active={!showMetrics}
+            onClick={() => setShowMetrics(false)}
+          />
+          <MetricsTab
+            active={showMetrics}
+            onToggle={() => setShowMetrics((v) => !v)}
+          />
+        </>
+      }
+    >
       <div className="xp-layout">
         <div className="xp-sidebar">
           <ResourceTree
@@ -94,25 +110,29 @@ export function ExplorerPage() {
 
         <div className="xp-main">
           <div className="xp-top">
-            <DetailsPanel
-              selected={selected}
-              node={selectedNode}
-              namespace={selectedNs}
-              pod={podDetails}
-              loading={loadingDetails}
-              hasLogs={!!logs}
-              onFetchLogs={async () => {
-                if (!selected || selected.kind !== "pod") return;
-                setLoadingLogs(true);
-                try {
-                  const txt = await getPodLogs(selected.namespace, selected.name, tailLines);
-                  setLogs(txt);
-                } finally {
-                  setLoadingLogs(false);
-                }
-              }}
-              fetchingLogs={loadingLogs}
-            />
+            {showMetrics ? (
+              <MetricsPanel />
+            ) : (
+              <DetailsPanel
+                selected={selected}
+                node={selectedNode}
+                namespace={selectedNs}
+                pod={podDetails}
+                loading={loadingDetails}
+                hasLogs={!!logs}
+                onFetchLogs={async () => {
+                  if (!selected || selected.kind !== "pod") return;
+                  setLoadingLogs(true);
+                  try {
+                    const txt = await getPodLogs(selected.namespace, selected.name, tailLines);
+                    setLogs(txt);
+                  } finally {
+                    setLoadingLogs(false);
+                  }
+                }}
+                fetchingLogs={loadingLogs}
+              />
+            )}
           </div>
 
           {logs && (
