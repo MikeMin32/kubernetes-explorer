@@ -1,0 +1,17 @@
+backend:
+  image:
+    repository: ghcr.io/MikeMin32/k8s-explorer-backend
+    tag: v0.1.0
+  replicaCount: 1
+  env:
+    PROMETHEUS_URL: "http://kps-kube-prometheus-stack-prometheus.monitoring.svc.cluster.local:9090"
+
+gateway:
+  image:
+    repository: ghcr.io/MikeMin32/k8s-explorer-gateway
+    tag: v0.1.0
+  replicaCount: 1
+
+ingress:
+  enabled: true
+  host: k8s-explorer.YOURDOMAIN.com
