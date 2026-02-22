@@ -32,17 +32,35 @@ jobs:
           echo "${{ secrets.DEPLOY_SSH_KEY }}" > ~/.ssh/id_ed25519
           chmod 600 ~/.ssh/id_ed25519
 
-      - name: Start IAP tunnel to VM
+      - name: Start IAP tunnel to VM (with logs)
         run: |
+          set -euo pipefail
           gcloud compute start-iap-tunnel "${{ secrets.GCP_INSTANCE_NAME }}" 22 \
             --zone "${{ secrets.GCP_ZONE }}" \
             --project "${{ secrets.GCP_PROJECT_ID }}" \
-            --local-host-port=localhost:2222 &
-          sleep 2
+            --local-host-port=localhost:2222 \
+            --verbosity=info \
+            > /tmp/iap-tunnel.log 2>&1 &
+          echo "Tunnel PID=$!"
+          sleep 3
+          echo "=== IAP tunnel log ==="
+          tail -n 80 /tmp/iap-tunnel.log || true
+          echo "=== Listening check ==="
+          ss -lntp | grep 2222 || true
 
       - name: Trust host key (via tunnel)
         run: |
-          ssh-keyscan -p 2222 -H localhost >> ~/.ssh/known_hosts
+          set -euo pipefail
+          for i in {1..10}; do
+            if ssh-keyscan -T 5 -p 2222 -H localhost >> ~/.ssh/known_hosts 2>/tmp/sshkeyscan.err; then
+              echo "ssh-keyscan ok"
+              exit 0
+            fi
+            echo "ssh-keyscan failed attempt $i"
+            cat /tmp/sshkeyscan.err || true
+            sleep 2
+          done
+          exit 1
 
       - name: SSH smoke test
         run: |
