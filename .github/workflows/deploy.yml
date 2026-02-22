@@ -1,0 +1,49 @@
+name: deploy
+
+on:
+  push:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Auth to GCP via OIDC (WIF)
+        uses: google-github-actions/auth@v2
+        with:
+          project_id: ${{ secrets.GCP_PROJECT_ID }}
+          workload_identity_provider: ${{ secrets.GCP_WIF_PROVIDER }}
+          service_account: ${{ secrets.GCP_SA_EMAIL }}
+
+      - name: Setup gcloud
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Write SSH key
+        run: |
+          install -m 700 -d ~/.ssh
+          echo "${{ secrets.DEPLOY_SSH_KEY }}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+
+      - name: Start IAP tunnel to VM
+        run: |
+          gcloud compute start-iap-tunnel "${{ secrets.GCP_INSTANCE_NAME }}" 22 \
+            --zone "${{ secrets.GCP_ZONE }}" \
+            --project "${{ secrets.GCP_PROJECT_ID }}" \
+            --local-host-port=localhost:2222 &
+          sleep 2
+
+      - name: Trust host key (via tunnel)
+        run: |
+          ssh-keyscan -p 2222 -H localhost >> ~/.ssh/known_hosts
+
+      - name: SSH smoke test
+        run: |
+          ssh -p 2222 "${{ secrets.DEPLOY_SSH_USER }}"@localhost "whoami && hostname && uptime"
