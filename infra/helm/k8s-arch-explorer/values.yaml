@@ -1,6 +1,6 @@
 backend:
   image:
-    repository: ghcr.io/MikeMin32/k8s-explorer-backend
+    repository: ghcr.io/mikemin32/k8s-explorer-backend
     tag: v0.1.0
   replicaCount: 1
   env:
@@ -8,10 +8,10 @@ backend:
 
 gateway:
   image:
-    repository: ghcr.io/MikeMin32/k8s-explorer-gateway
+    repository: ghcr.io/mikemin32/k8s-explorer-gateway
     tag: v0.1.0
   replicaCount: 1
 
 ingress:
   enabled: true
-  host: k8s-explorer.YOURDOMAIN.com
+  host: ""
