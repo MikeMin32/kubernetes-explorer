@@ -5,7 +5,20 @@ metadata:
   name: {{ printf "%s-backend" .Release.Name }}
 rules:
   - apiGroups: [""]
-    resources: ["nodes"]
+    resources:
+      - nodes
+      - pods
+      - namespaces
+      - services
+      - endpoints
+    verbs: ["get","list","watch"]
+
+  - apiGroups: ["apps"]
+    resources:
+      - deployments
+      - replicasets
+      - statefulsets
+      - daemonsets
     verbs: ["get","list","watch"]
 ---
 apiVersion: rbac.authorization.k8s.io/v1
