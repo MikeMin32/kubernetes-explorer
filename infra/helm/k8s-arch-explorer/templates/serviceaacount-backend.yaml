@@ -1,0 +1,7 @@
+{{- if .Values.backend.serviceAccount.create }}
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ .Values.backend.serviceAccount.name | default (printf "%s-backend" .Release.Name) }}
+  namespace: {{ .Release.Namespace }}
+{{- end }}

@@ -3,8 +3,13 @@ backend:
     repository: ghcr.io/mikemin32/k8s-explorer-backend
     tag: v0.1.0
   replicaCount: 1
-  env:
-    PROMETHEUS_URL: "http://kps-kube-prometheus-stack-prometheus.monitoring.svc.cluster.local:9090"
+
+  serviceAccount:
+    create: true
+    name: k8s-explorer-backend
+
+  nv:
+    PROMETHEUS_URL: "http://kps-kube-prometheus-stack-prometheus.monitoring.svc:9090"
 
 gateway:
   image:
@@ -15,3 +20,6 @@ gateway:
 ingress:
   enabled: true
   host: ""
+
+rbac:
+  create: true
