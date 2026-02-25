@@ -8,7 +8,7 @@ backend:
     create: true
     name: k8s-explorer-backend
 
-  nv:
+  env:
     PROMETHEUS_URL: "http://kps-kube-prometheus-stack-prometheus.monitoring.svc:9090"
 
 gateway:
