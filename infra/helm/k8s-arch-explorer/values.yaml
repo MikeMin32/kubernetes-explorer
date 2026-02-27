@@ -1,25 +1,66 @@
+# infra/helm/k8s-arch-explorer/values.yaml
+
 backend:
   image:
-    repository: ghcr.io/mikemin32/k8s-explorer-backend
+    repository: ghcr.io/MikeMin32/k8s-explorer-backend
     tag: v0.1.0
-  replicaCount: 1
 
+  # Base replicas (used when autoscaling is disabled, or as initial desired state)
+  replicaCount: 2
+
+  # Environment variables for backend container
+  env:
+    PROMETHEUS_URL: "http://kps-kube-prometheus-stack-prometheus.monitoring.svc.cluster.local:9090"
+
+  # ServiceAccount used by backend (RBAC)
   serviceAccount:
     create: true
     name: k8s-explorer-backend
 
-  env:
-    PROMETHEUS_URL: "http://kps-kube-prometheus-stack-prometheus.monitoring.svc:9090"
+  # Pod resources (HPA requires requests)
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+  # Horizontal Pod Autoscaler
+  autoscaling:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 5
+    targetCPUUtilizationPercentage: 70
+
 
 gateway:
   image:
-    repository: ghcr.io/mikemin32/k8s-explorer-gateway
+    repository: ghcr.io/MikeMin32/k8s-explorer-gateway
     tag: v0.1.0
-  replicaCount: 1
+
+  replicaCount: 2
+
+  resources:
+    requests:
+      cpu: 50m
+      memory: 128Mi
+    limits:
+      cpu: 300m
+      memory: 256Mi
+
+  autoscaling:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 5
+    targetCPUUtilizationPercentage: 70
+
 
 ingress:
   enabled: true
-  host: ""
+  host: "k8s-explorer.YOURDOMAIN.com"
 
+
+# RBAC (ClusterRole + ClusterRoleBinding for backend)
 rbac:
   create: true
