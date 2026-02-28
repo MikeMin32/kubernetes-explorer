@@ -145,6 +145,32 @@
   max-width: 560px;
 }
 
+/* ─── Mobile ──────────────────────────────────────────────── */
+@media (max-width: 640px) {
+  .mdr-metrics {
+    grid-template-columns: 1fr 1fr;
+    max-width: 100%;
+    gap: 10px;
+  }
+
+  .mdr-card-value {
+    font-size: 28px;
+  }
+
+  .mdr-panel-title {
+    font-size: 20px;
+  }
+
+  .mdr-panel-header {
+    padding: 10px 12px;
+  }
+
+  .mdr-panel-body {
+    padding: 12px;
+    gap: 14px;
+  }
+}
+
 .mdr-card {
   border: 1px solid var(--line);
   border-radius: 10px;

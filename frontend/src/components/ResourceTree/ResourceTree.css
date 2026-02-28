@@ -68,9 +68,25 @@ details:not([open]) .rt-caret {
   background: rgba(47,111,237,0.06);
 }
 
-.rt-row.active {
-  background: var(--blue);
+/* Node — blue */
+.rt-row.active.active-node {
+  background: #2f6fed;
   color: #fff;
+  box-shadow: 0 2px 8px rgba(47,111,237,0.35);
+}
+
+/* Namespace — violet */
+.rt-row.active.active-ns {
+  background: #7c3aed;
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(124,58,237,0.35);
+}
+
+/* Pod — emerald */
+.rt-row.active.active-pod {
+  background: #059669;
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(5,150,105,0.35);
 }
 
 .rt-row.active .rt-text {
@@ -101,4 +117,21 @@ details:not([open]) .rt-caret {
   font-size: 14px;
   font-weight: 400;
   padding: 10px 12px;
+}
+
+/* ─── Mobile ──────────────────────────────────────────────── */
+@media (max-width: 640px) {
+  .rt-row {
+    padding: 12px 10px;
+    touch-action: manipulation;
+  }
+
+  .rt-text {
+    font-size: 14px;
+  }
+
+  .rt-summary {
+    padding: 10px 8px;
+    touch-action: manipulation;
+  }
 }

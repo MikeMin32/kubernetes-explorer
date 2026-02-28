@@ -133,6 +133,48 @@
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
 }
 
+/* ─── Mobile ──────────────────────────────────────────────── */
+@media (max-width: 640px) {
+  .dp-title {
+    font-size: 20px;
+  }
+
+  .dp-row {
+    grid-template-columns: 90px 1fr;
+    font-size: 14px;
+  }
+
+  .dp-chip,
+  .dp-li {
+    font-size: 13px;
+  }
+
+  .dp-subtitle {
+    font-size: 15px;
+  }
+
+  .dp-muted {
+    font-size: 14px;
+  }
+
+  .dp-welcome-title {
+    font-size: 22px;
+  }
+
+  .dp-welcome-text {
+    font-size: 14px;
+  }
+
+  .dp-welcome-list li {
+    font-size: 13px;
+  }
+
+  .dp-welcome-logo {
+    width: 60px;
+    height: 60px;
+  }
+}
+
 /* Welcome screen styles */
 .dp-welcome {
   display: flex;

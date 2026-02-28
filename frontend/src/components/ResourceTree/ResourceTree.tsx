@@ -13,6 +13,8 @@ type Props = {
   podsByNs: Record<string, PodListItem[]>;
   podsLoadingNs: Record<string, boolean>;
   selected: Selected;
+  /** Last explicitly-selected node — kept highlighted across namespace/pod navigation. */
+  pinnedNode?: string | null;
 
   onSelectNode: (name: string) => void;
   onSelectNamespace: (name: string) => void;
@@ -25,10 +27,23 @@ export function ResourceTree({
   podsByNs,
   podsLoadingNs,
   selected,
+  pinnedNode,
   onSelectNode,
   onSelectNamespace,
   onSelectPod,
 }: Props) {
+  // When a pod is selected, resolve its parent namespace and node so all
+  // three layers can be highlighted simultaneously.
+  const activePodNs =
+    selected?.kind === "pod" ? selected.namespace : null;
+
+  const activePodNode =
+    selected?.kind === "pod"
+      ? (podsByNs[selected.namespace] ?? []).find(
+          (p) => p.name === selected.name
+        )?.nodeName ?? null
+      : null;
+
   return (
     <div className="rt">
       <Section title="Nodes" defaultOpen={false}>
@@ -37,7 +52,11 @@ export function ResourceTree({
             key={n.name}
             icon="node"
             text={n.name}
-            active={selected?.kind === "node" && selected.name === n.name}
+            active={
+              (selected?.kind === "node" && selected.name === n.name) ||
+              activePodNode === n.name ||
+              pinnedNode === n.name
+            }
             onClick={() => onSelectNode(n.name)}
           />
         ))}
@@ -51,7 +70,10 @@ export function ResourceTree({
             key={ns.name}
             icon="ns"
             text={ns.name}
-            active={selected?.kind === "namespace" && selected.name === ns.name}
+            active={
+              (selected?.kind === "namespace" && selected.name === ns.name) ||
+              activePodNs === ns.name
+            }
             onClick={() => onSelectNamespace(ns.name)}
           />
         ))}
@@ -131,7 +153,7 @@ function Row({
   onClick?: () => void;
 }) {
   return (
-    <button className={`rt-row ${active ? "active" : ""}`} onClick={onClick} type="button">
+    <button className={`rt-row ${active ? `active active-${icon}` : ""}`} onClick={onClick} type="button">
       <span className={`rt-ico ${icon}`} aria-hidden />
       <span className="rt-text">{text}</span>
     </button>
