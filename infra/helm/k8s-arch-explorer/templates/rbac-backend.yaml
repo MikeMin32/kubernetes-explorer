@@ -8,6 +8,7 @@ rules:
     resources:
       - nodes
       - pods
+      - pods/log
       - namespaces
       - services
       - endpoints
