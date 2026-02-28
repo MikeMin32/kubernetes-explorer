@@ -21,6 +21,9 @@ export function ExplorerPage() {
   const [podsLoadingNs, setPodsLoadingNs] = useState<Record<string, boolean>>({});
 
   const [selected, setSelected] = useState<Selected>(null);
+  // Tracks the last explicitly-clicked node so it stays highlighted even
+  // when the user navigates into a namespace or pod afterwards.
+  const [pinnedNode, setPinnedNode] = useState<string | null>(null);
 
   const [podDetails, setPodDetails] = useState<PodDetails | null>(null);
   const [logs, setLogs] = useState<string>("");
@@ -29,6 +32,20 @@ export function ExplorerPage() {
   const [loadingDetails, setLoadingDetails] = useState(false);
   const [loadingLogs, setLoadingLogs] = useState(false);
   const [showMetrics, setShowMetrics] = useState(false);
+
+  // Mobile-nav active tab: 'tree' | 'details' | 'metrics'
+  const [mobileTab, setMobileTab] = useState<'tree' | 'details' | 'metrics'>('tree');
+
+  // Auto-navigate to details pane on mobile when a resource is selected
+  useEffect(() => {
+    if (selected) setMobileTab('details');
+  }, [selected]);
+
+  // Keep showMetrics in sync with the mobile nav metrics tab
+  useEffect(() => {
+    if (mobileTab === 'metrics') setShowMetrics(true);
+    else if (mobileTab === 'details') setShowMetrics(false);
+  }, [mobileTab]);
 
   useEffect(() => {
     (async () => {
@@ -91,24 +108,34 @@ export function ExplorerPage() {
         </>
       }
     >
+      <div className="xp-page">
       <div className="xp-layout">
-        <div className="xp-sidebar">
+        <div className={`xp-sidebar${mobileTab === 'tree' ? ' mobile-visible' : ''}`}>
           <ResourceTree
             nodes={nodes}
             namespaces={namespaces}
             podsByNs={podsByNs}
             podsLoadingNs={podsLoadingNs}
             selected={selected}
-            onSelectNode={(name) => setSelected({ kind: "node", name })}
+            pinnedNode={pinnedNode}
+            onSelectNode={(name) => {
+              setPinnedNode(name);
+              setSelected({ kind: "node", name });
+            }}
             onSelectNamespace={async (name) => {
               setSelected({ kind: "namespace", name });
               await loadPodsForNamespace(name);
             }}
-            onSelectPod={(namespace, name) => setSelected({ kind: "pod", namespace, name })}
+            onSelectPod={(namespace, name) => {
+              // Pod's own nodeName will be highlighted via activePodNode;
+              // clear the explicit pin so only the real host node stands out.
+              setPinnedNode(null);
+              setSelected({ kind: "pod", namespace, name });
+            }}
           />
         </div>
 
-        <div className="xp-main">
+        <div className={`xp-main${mobileTab !== 'tree' ? ' mobile-visible' : ''}`}>
           <div className="xp-top">
             {showMetrics ? (
               <MetricsPanel />
@@ -159,6 +186,32 @@ export function ExplorerPage() {
           )}
         </div>
       </div>
+
+      {/* Mobile bottom nav — visible only on ≤640px via CSS */}
+      <nav className="xp-mobile-nav">
+        <button
+          className={`xp-mnav-btn${mobileTab === 'tree' ? ' active' : ''}`}
+          onClick={() => setMobileTab('tree')}
+        >
+          <span className="xp-mnav-icon">🌳</span>
+          Tree
+        </button>
+        <button
+          className={`xp-mnav-btn${mobileTab === 'details' ? ' active' : ''}`}
+          onClick={() => setMobileTab('details')}
+        >
+          <span className="xp-mnav-icon">📋</span>
+          Details
+        </button>
+        <button
+          className={`xp-mnav-btn${mobileTab === 'metrics' ? ' active' : ''}`}
+          onClick={() => setMobileTab('metrics')}
+        >
+          <span className="xp-mnav-icon">📊</span>
+          Metrics
+        </button>
+      </nav>
+    </div>
     </MacWindow>
   );
 }

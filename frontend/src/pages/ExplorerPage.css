@@ -1,8 +1,19 @@
-.xp-layout {
+/* Page wrapper — full height, optional bottom nav on mobile */
+.xp-page {
   width: 100%;
   height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.xp-layout {
+  width: 100%;
+  flex: 1;
   display: grid;
   grid-template-columns: 340px 1fr;
+  overflow: hidden;
+  min-height: 0;
 }
 
 .xp-sidebar {
@@ -35,4 +46,99 @@
   background: #fff;
   height: 320px;
   flex-shrink: 0;
+}
+
+/* ─── Mobile bottom nav ───────────────────────────────────── */
+.xp-mobile-nav {
+  display: none; /* hidden on desktop */
+}
+
+@media (max-width: 640px) {
+  /* Switch to single-column stacked */
+  .xp-layout {
+    grid-template-columns: 1fr;
+    grid-template-rows: 1fr;
+  }
+
+  /* Panes are hidden/shown via JS-applied class */
+  .xp-sidebar {
+    display: none;
+    padding: 12px 10px;
+  }
+  .xp-sidebar.mobile-visible {
+    display: block;
+    height: 100%;
+    box-sizing: border-box;
+  }
+
+  .xp-main {
+    display: none;
+    padding: 10px 10px 12px;
+    gap: 10px;
+  }
+  .xp-main.mobile-visible {
+    display: flex;
+    height: 100%;
+    box-sizing: border-box;
+  }
+
+  .xp-bottom {
+    height: 260px;
+  }
+
+  .xp-top {
+    border-radius: 8px;
+  }
+
+  .xp-bottom {
+    border-radius: 8px;
+  }
+
+  /* Bottom nav bar */
+  .xp-mobile-nav {
+    display: flex;
+    flex-shrink: 0;
+    border-top: 1px solid var(--line);
+    background: #fff;
+    height: 52px;
+  }
+
+  .xp-mnav-btn {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    border: none;
+    background: transparent;
+    color: var(--muted);
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    cursor: pointer;
+    padding: 4px 0;
+    transition: color 150ms ease;
+    position: relative;
+  }
+
+  .xp-mnav-btn.active {
+    color: var(--blue);
+  }
+
+  .xp-mnav-btn.active::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 10%;
+    width: 80%;
+    height: 2px;
+    background: var(--blue);
+    border-radius: 0 0 2px 2px;
+  }
+
+  .xp-mnav-icon {
+    font-size: 18px;
+    line-height: 1;
+  }
 }

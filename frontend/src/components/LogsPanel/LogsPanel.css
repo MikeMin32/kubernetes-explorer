@@ -106,3 +106,32 @@
   color: #111827;
   white-space: pre;
 }
+
+/* ─── Mobile ──────────────────────────────────────────────── */
+@media (max-width: 640px) {
+  .lp {
+    padding: 10px 10px 12px;
+    gap: 8px;
+  }
+
+  .lp-title {
+    font-size: 15px;
+  }
+
+  .lp-pre {
+    font-size: 12px;
+    padding: 10px;
+  }
+
+  .lp-btn,
+  .lp-close {
+    padding: 6px 10px;
+    font-size: 12px;
+  }
+
+  .lp-input {
+    width: 48px;
+    font-size: 12px;
+    padding: 6px 6px;
+  }
+}

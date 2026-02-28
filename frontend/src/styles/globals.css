@@ -21,4 +21,7 @@ body {
   font-family: var(--font);
   color: var(--text);
   background: var(--bg);
+  /* Remove 300ms tap delay on all mobile tappable elements */
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
 }
