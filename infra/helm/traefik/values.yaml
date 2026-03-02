@@ -1,5 +1,5 @@
 additionalArguments:
-  - "--certificatesresolvers.le.acme.email=YOU@EMAIL.COM"
+  - "--certificatesresolvers.le.acme.email=mike.min.32@gmail.com"
   - "--certificatesresolvers.le.acme.storage=/data/acme.json"
   - "--certificatesresolvers.le.acme.httpchallenge.entrypoint=web"
   - "--entrypoints.web.http.redirections.entrypoint.to=websecure"
