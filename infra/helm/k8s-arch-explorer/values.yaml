@@ -58,7 +58,26 @@ gateway:
 
 ingress:
   enabled: true
-  host: "k8s-explorer.YOURDOMAIN.com"
+
+  # Your single domain
+  host: "k8sx.tech"
+
+  # Kubernetes ingressClassName
+  className: "traefik"
+
+  # Tell Traefik to:
+  # - listen on web + websecure
+  # - issue/attach TLS cert via ACME resolver "le"
+  # - keep your existing middleware for /api strip (CRD middleware)
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: "web,websecure"
+    traefik.ingress.kubernetes.io/router.tls: "true"
+    traefik.ingress.kubernetes.io/router.tls.certresolver: "le"
+    traefik.ingress.kubernetes.io/router.middlewares: "k8s-explorer-api-strip@kubernetescrd"
+
+  # Add TLS section to the Ingress spec
+  tls:
+    enabled: true
 
 
 # RBAC (ClusterRole + ClusterRoleBinding for backend)
