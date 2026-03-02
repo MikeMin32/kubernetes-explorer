@@ -1,0 +1,11 @@
+additionalArguments:
+  - "--certificatesresolvers.le.acme.email=YOU@EMAIL.COM"
+  - "--certificatesresolvers.le.acme.storage=/data/acme.json"
+  - "--certificatesresolvers.le.acme.httpchallenge.entrypoint=web"
+  - "--entrypoints.web.http.redirections.entrypoint.to=websecure"
+  - "--entrypoints.web.http.redirections.entrypoint.scheme=https"
+
+persistence:
+  enabled: true
+  path: /data
+  size: 1Gi
