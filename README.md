@@ -1,6 +1,6 @@
 # K8sX — Kubernetes Explorer & Observer
 
-🚀 Live demo: **http://k8sx.tech**  
+🚀 Live demo: **https://k8sx.tech**  
 K8sX is a Kubernetes cluster exploration web app with a clean UI for browsing cluster resources and inspecting details in real time.
 
 ---
@@ -97,7 +97,7 @@ High level:
 
 
 ## Demo
-🌍 **http://k8sx.tech**
+🌍 **https://k8sx.tech**
 
 If you like the project or want to collaborate — feel free to open an issue or reach out.
 
